@@ -15,6 +15,10 @@ class ShipOrder extends Model
 
     protected $fillable = [
         'id',
-        'address',
     ];
+
+    public function address()
+    {
+        return $this->hasOne(ShipOrderAddress::class);
+    }
 }

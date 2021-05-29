@@ -19,8 +19,6 @@ class CreateShipOrdersTable extends Migration
             $table->unsignedBigInteger('person_id')->index();
             $table->foreign('person_id')->references('id')->on('people');
 
-            $table->json('address');
-
             $table->timestamps();
         });
     }
