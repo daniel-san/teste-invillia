@@ -17,14 +17,10 @@ class PersonTest extends TestCase
             'name' => 'Test Person'
         ]);
 
-        $person->phones()->create([
-            'number' => '4444444'
-        ]);
-        $person->phones()->create([
-            'number' => '5555555'
-        ]);
-        $person->phones()->create([
-            'number' => '6666666'
+        $person->phones()->createMany([
+            ['number' => '4444444'],
+            ['number' => '5555555'],
+            ['number' => '6666666'],
         ]);
 
         $this->assertCount(3, $person->phones);

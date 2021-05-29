@@ -3,7 +3,6 @@
 namespace Tests\Unit;
 
 use App\Models\Person;
-use App\Models\Phone;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,11 +16,9 @@ class PhoneTest extends TestCase
             'name' => 'Test Person'
         ]);
 
-        $person->phones()->create([
+        $phone = $person->phones()->create([
             'number' => '4444444'
         ]);
-
-        $phone = $person->phones()->first();
 
         $this->assertInstanceOf(Person::class, $phone->person);
     }
