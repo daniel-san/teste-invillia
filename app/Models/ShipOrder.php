@@ -15,6 +15,7 @@ class ShipOrder extends Model
 
     protected $fillable = [
         'id',
+        'person_id',
     ];
 
     public function address()
