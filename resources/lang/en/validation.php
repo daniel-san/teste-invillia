@@ -121,6 +121,10 @@ return [
     'uploaded' => 'The :attribute failed to upload.',
     'url' => 'The :attribute format is invalid.',
     'uuid' => 'The :attribute must be a valid UUID.',
+    'xml_upload' => [
+        'success' => 'Files were uploaded succesfully',
+        'failed' => 'Upload failed'
+    ]
 
     /*
     |--------------------------------------------------------------------------
