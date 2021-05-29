@@ -124,7 +124,7 @@ return [
     'xml_upload' => [
         'success' => 'Files were uploaded succesfully',
         'failed' => 'Upload failed'
-    ]
+    ],
 
     /*
     |--------------------------------------------------------------------------
