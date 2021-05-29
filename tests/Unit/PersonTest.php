@@ -13,15 +13,7 @@ class PersonTest extends TestCase
 
     public function test_it_has_many_phones()
     {
-        $person = Person::create([
-            'name' => 'Test Person'
-        ]);
-
-        $person->phones()->createMany([
-            ['number' => '4444444'],
-            ['number' => '5555555'],
-            ['number' => '6666666'],
-        ]);
+        $person = Person::factory()->hasPhones(3)->create();
 
         $this->assertCount(3, $person->phones);
         $this->assertContainsOnlyInstancesOf(Phone::class, $person->phones);
