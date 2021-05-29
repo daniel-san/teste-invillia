@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Feature;
 
 use App\Models\Person;
 use App\Models\ShipOrder;
@@ -198,6 +198,8 @@ class XmlServiceTest extends TestCase
     {
         $xml = $this->valid_shiporders_xml;
 
+        Person::factory(3)->create();
+
         $shipOrders = (new XmlService)->parseShipOrdersXml($xml);
 
         $this->assertInstanceOf(Collection::class, $shipOrders);
@@ -206,7 +208,6 @@ class XmlServiceTest extends TestCase
 
     public function test_it_stores_shiporders_xml_data_into_database()
     {
-        $this->withoutExceptionHandling();
         $shipOrdersXml = $this->valid_shiporders_xml;
 
         Person::factory(3)->create();
