@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\PersonController;
+use App\Http\Controllers\Api\ShipOrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +18,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/people', [PersonController::class, 'index'])->name('api.people.index');
+    Route::get('/ship-orders', [ShipOrderController::class, 'index'])->name('api.ship-orders.index');
 });
