@@ -22,23 +22,34 @@ class XmlUploadTest extends TestCase
 
     public function test_it_can_process_xml_files_for_people_and_shiporders()
     {
-        $people = UploadedFile::fake()->createWithContent('people.xml', '');
-        $shipOrders = UploadedFile::fake()->createWithContent('shiporders.xml', '');
+        $this->withoutExceptionHandling();
+        $people = UploadedFile::fake()->createWithContent('people.xml',
+            file_get_contents(__DIR__ . '/../stubs/people.xml')
+        );
+        $shipOrders = UploadedFile::fake()->createWithContent('shiporders.xml',
+            file_get_contents(__DIR__ . '/../stubs/shiporders.xml')
+        );
 
         $response = $this->post(route('web.xml-upload'), [
             'people' => $people,
             'shiporders' => $shipOrders
         ]);
 
-        $response->assertStatus(302)->assertRedirect(route('web.index'));
+        $response->assertSessionHasNoErrors()
+                 ->assertStatus(302)
+                 ->assertRedirect(route('web.index'));
     }
 
     public function test_it_can_process_xml_files_in_the_background()
     {
         Queue::fake();
 
-        $people = UploadedFile::fake()->createWithContent('people.xml', '');
-        $shipOrders = UploadedFile::fake()->createWithContent('shiporders.xml', '');
+        $people = UploadedFile::fake()->createWithContent('people.xml',
+            file_get_contents(__DIR__ . '/../stubs/people.xml')
+        );
+        $shipOrders = UploadedFile::fake()->createWithContent('shiporders.xml',
+            file_get_contents(__DIR__ . '/../stubs/shiporders.xml')
+        );
 
         $response = $this->post(route('web.xml-upload'), [
             'people' => $people,
@@ -47,7 +58,9 @@ class XmlUploadTest extends TestCase
         ]);
 
         Queue::assertPushed(ProcessXmlFilesJob::class);
-        $response->assertStatus(302)->assertRedirect(route('web.index'));
+        $response->assertSessionHasNoErrors()
+                 ->assertStatus(302)
+                 ->assertRedirect(route('web.index'));
 
     }
 }
