@@ -4,8 +4,8 @@
 	  <personid>1</personid>
 	  <personname>Name 1</personname>
 	  <phones>
-		<phone>2345678a</phone>
-		<phone>1234567n</phone>
+		<phone>2345678</phone>
+		<phone>1234567</phone>
 	  </phones>
 	</person>
 	<person>
@@ -22,5 +22,4 @@
 		<phone>7777777</phone>
 		<phone>8888888</phone>
 	  </phones>
-	</person>
-</people>
+

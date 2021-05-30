@@ -19,6 +19,7 @@ class XmlServiceTest extends TestCase
         parent::setUp();
         $this->valid_people_xml = file_get_contents(__DIR__ . '/../stubs/people.xml');
         $this->invalid_people_xml = file_get_contents(__DIR__ . '/../stubs/people_invalid.xml');
+        $this->malformed_people_xml = file_get_contents(__DIR__ . '/../stubs/people_malformed.xml');
 
         $this->valid_shiporders_xml = file_get_contents(__DIR__ . '/../stubs/shiporders.xml');
         $this->invalid_shiporders_xml = file_get_contents(__DIR__ . '/../stubs/shiporders_invalid.xml');
@@ -32,9 +33,9 @@ class XmlServiceTest extends TestCase
         $this->assertIsObject($parsed);
     }
 
-    public function test_it_throws_an_exception_when_xml_is_invalid()
+    public function test_it_throws_an_exception_when_xml_is_malformed()
     {
-        $xml = $this->invalid_people_xml;
+        $xml = $this->malformed_people_xml;
 
         $this->expectException(RuntimeException::class);
         $parsed = (new XmlService)->parse($xml);

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Rules\PeopleXml;
+use App\Rules\ShipOrdersXml;
 use App\Rules\ValidXml;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -27,7 +28,7 @@ class XmlUploadRequest extends FormRequest
     {
         return [
             'people' => ['required', 'file', 'mimes:xml', new ValidXml, new PeopleXml],
-            'shiporders' => ['required', 'mimes:xml', new ValidXml],
+            'shiporders' => ['required', 'file', 'mimes:xml', new ValidXml, new ShipOrdersXml],
         ];
 
     }

@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class XmlUploadTest extends TestCase
@@ -63,4 +64,43 @@ class XmlUploadTest extends TestCase
                  ->assertRedirect(route('web.index'));
 
     }
+
+    public function test_it_returns_errors_when_files_are_invalid()
+    {
+        $people = UploadedFile::fake()->createWithContent('people.xml',
+            file_get_contents(__DIR__ . '/../stubs/people_invalid.xml')
+        );
+        $shipOrders = UploadedFile::fake()->createWithContent('shiporders.xml',
+            file_get_contents(__DIR__ . '/../stubs/shiporders_invalid.xml')
+        );
+
+        $response = $this->post(route('web.xml-upload'), [
+            'people' => $people,
+            'shiporders' => $shipOrders
+        ]);
+
+        $response->assertSessionHasErrors()
+                 ->assertStatus(302)
+                 ->assertRedirect(route('web.index'));
+    }
+
+    public function test_it_returns_errors_when_files_are_malformed()
+    {
+        $people = UploadedFile::fake()->createWithContent('people.xml',
+            file_get_contents(__DIR__ . '/../stubs/people_malformed.xml')
+        );
+        $shipOrders = UploadedFile::fake()->createWithContent('shiporders.xml',
+            file_get_contents(__DIR__ . '/../stubs/shiporders_malformed.xml')
+        );
+
+        $response = $this->post(route('web.xml-upload'), [
+            'people' => $people,
+            'shiporders' => $shipOrders
+        ]);
+
+        $response->assertSessionHasErrors()
+                 ->assertStatus(302)
+                 ->assertRedirect(route('web.index'));
+    }
+
 }

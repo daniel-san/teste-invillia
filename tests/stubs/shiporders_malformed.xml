@@ -32,7 +32,7 @@
 			<title>Title 2</title>
 			<note>Note 2</note>
 			<quantity>45</quantity>
-			<price>13.45b</price>
+			<price>13.45</price>
 		  </item>
 	  </items>
 	</shiporder>
@@ -55,9 +55,7 @@
 		  <item>
 			<title>Title 4</title>
 			<note>Note 4</note>
-			<quantity>2a</quantity>
-			<price>77.12a</price>
+			<quantity>2</quantity>
+			<price>77.12</price>
 		  </item>
 	  </items>
-	</shiporder>
-</shiporders>

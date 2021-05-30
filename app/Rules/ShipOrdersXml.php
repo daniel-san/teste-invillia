@@ -5,7 +5,7 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 
-class PeopleXml implements Rule
+class ShipOrdersXml implements Rule
 {
     /**
      * Determine if the validation rule passes.
@@ -16,10 +16,10 @@ class PeopleXml implements Rule
      */
     public function passes($attribute, $value)
     {
-        $peopleXml = $value->get();
+        $shipOrdersXml = $value->get();
 
         try {
-            $this->validateXml($peopleXml);
+            $this->validateXml($shipOrdersXml);
         } catch (\Exception $e) {
             return false;
         }
@@ -35,17 +35,31 @@ class PeopleXml implements Rule
         $xmlArray = collect($xmlArray)->first();
 
         foreach($xmlArray as $key => $value) {
-            $phones = data_get($value, 'phones');
 
-            if (!is_array($phones['phone'])) {
-                data_set($xmlArray, "{$key}.phones.phone", [$phones['phone']]);
+            $items = data_get($value, 'items.item');
+            if(empty(array_filter($items, 'is_array'))) {
+                $normalizedItem = [[
+                    'title' => $items['title'],
+                    'note' => $items['note'],
+                    'quantity' => $items['quantity'],
+                    'price' => $items['price'],
+                ]];
+
+                data_set($xmlArray, "{$key}.items.item", $normalizedItem);
             }
         }
 
         $rules = [
-            '*.personid' => 'numeric',
-            '*.personname' => 'string',
-            '*.phones.phone.*' => 'numeric',
+            '*.orderid' => 'numeric',
+            '*.orderperson' => 'numeric',
+            '*.shipto.name' => 'string',
+            '*.shipto.address' => 'string',
+            '*.shipto.city' => 'string',
+            '*.shipto.country' => 'string',
+            '*.items.item.*.title' => 'string',
+            '*.items.item.*.note' => 'string',
+            '*.items.item.*.quantity' => 'numeric',
+            '*.items.item.*.price' => 'numeric'
         ];
 
         $validator = Validator::make($xmlArray, $rules);

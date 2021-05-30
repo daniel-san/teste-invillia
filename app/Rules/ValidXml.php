@@ -23,7 +23,7 @@ class ValidXml implements Rule
             return false;
         }
 
-        return true;
+        return empty($xml) ? false : true;
     }
 
     /**
