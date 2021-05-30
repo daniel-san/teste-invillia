@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Person;
+use App\Models\ShipOrder;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -64,8 +65,53 @@ class XmlService
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
+            throw $e;
         }
 
         return $people;
+    }
+
+    public function parseShipOrdersXml($xml)
+    {
+        $parsed = $this->parse($xml);
+
+        $shipOrders = collect();
+
+        try {
+            DB::beginTransaction();
+            foreach($parsed as $shipOrderData) {
+                $shipOrder = new ShipOrder();
+                $shipOrder->id = $shipOrderData->orderid;
+                $shipOrder->person_id = $shipOrderData->orderperson;
+
+                $shipOrders->push(
+                    tap($shipOrder)->save()
+                );
+
+                $shipOrder->address()->create([
+                    'name' => $shipOrderData->shipto->name,
+                    'address' => $shipOrderData->shipto->address,
+                    'city' => $shipOrderData->shipto->city,
+                    'country' => $shipOrderData->shipto->country,
+                ]);
+
+                foreach ($shipOrderData->items->item as $item)
+                {
+                    $shipOrder->items()->create([
+                        'title' => $item->title,
+                        'note' => $item->note,
+                        'quantity' => intval($item->quantity),
+                        'price' => floatval($item->price),
+                    ]);
+                }
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+
+        return $shipOrders;
     }
 }
