@@ -24,7 +24,7 @@ class XmlUploadRequest extends FormRequest
     public function rules()
     {
         return [
-            'persons' => 'required|mimes:xml',
+            'people' => 'required|mimes:xml',
             'shiporders' => 'required|mimes:xml'
         ];
 

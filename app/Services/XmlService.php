@@ -80,6 +80,12 @@ class XmlService
         try {
             DB::beginTransaction();
             foreach($parsed as $shipOrderData) {
+
+                if ($shipOrder = ShipOrder::whereId($shipOrderData->orderid)->first()) {
+                    $shipOrders->push($shipOrders);
+                    continue;
+                }
+
                 $shipOrder = new ShipOrder();
                 $shipOrder->id = $shipOrderData->orderid;
                 $shipOrder->person_id = $shipOrderData->orderperson;
