@@ -33,10 +33,12 @@ class PersonApiTest extends TestCase
             'Accept' => 'application/json',
         ])->json('get', route('api.people.index'));
 
+        $collection = PersonResource::collection(
+            Person::with(['phones'])->get()
+        )->toJson();
+
         $response->assertStatus(200)->assertExactJson(
-            PersonResource::collection(
-                Person::with(['phones'])->get()
-            )->toArray(request())
+            json_decode($collection, true)
         );
     }
 }

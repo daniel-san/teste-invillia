@@ -33,10 +33,12 @@ class ShipOrderApiTest extends TestCase
             'Accept' => 'application/json',
         ])->json('get', route('api.ship-orders.index'));
 
+        $collection = ShipOrderResource::collection(
+            ShipOrder::with(['person', 'items', 'address'])->get()
+        )->toJson();
+
         $response->assertStatus(200)->assertExactJson(
-            ShipOrderResource::collection(
-                ShipOrder::with(['person', 'items', 'address'])->get()
-            )->toArray(request())
+            json_decode($collection, true)
         );
     }
 }
