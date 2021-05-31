@@ -29,14 +29,14 @@ class ShipOrdersXml implements Rule
 
     protected function validateXml($xml)
     {
-        $parsed = json_encode(simplexml_load_string($xml));
-        $xmlArray = json_decode($parsed, true);
+        $parsedOrders = json_encode(simplexml_load_string($xml));
+        $shipOrdersArray = json_decode($parsedOrders, true);
 
-        $xmlArray = collect($xmlArray)->first();
+        $shipOrdersArray = collect($shipOrdersArray)->first();
 
-        foreach($xmlArray as $key => $value) {
+        foreach($shipOrdersArray as $key => $order) {
 
-            $items = data_get($value, 'items.item');
+            $items = data_get($order, 'items.item');
             if(empty(array_filter($items, 'is_array'))) {
                 $normalizedItem = [[
                     'title' => $items['title'],
@@ -45,7 +45,7 @@ class ShipOrdersXml implements Rule
                     'price' => $items['price'],
                 ]];
 
-                data_set($xmlArray, "{$key}.items.item", $normalizedItem);
+                data_set($shipOrdersArray, "{$key}.items.item", $normalizedItem);
             }
         }
 
@@ -62,7 +62,7 @@ class ShipOrdersXml implements Rule
             '*.items.item.*.price' => 'numeric'
         ];
 
-        $validator = Validator::make($xmlArray, $rules);
+        $validator = Validator::make($shipOrdersArray, $rules);
 
         return $validator->validate();
     }

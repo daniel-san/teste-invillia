@@ -33,9 +33,9 @@ class ProcessXmlFilesJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(XmlService $service)
     {
-        $people = app(XmlService::class)->parsePeopleXml($this->peopleXml);
-        $orders = app(XmlService::class)->parseShipOrdersXml($this->shipOrdersXml);
+        $people = $service->parsePeopleXml($this->peopleXml);
+        $orders = $service->parseShipOrdersXml($this->shipOrdersXml);
     }
 }

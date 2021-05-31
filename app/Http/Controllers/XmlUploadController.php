@@ -8,7 +8,7 @@ use App\Services\XmlService;
 
 class XmlUploadController extends Controller
 {
-    public function store(XmlUploadRequest $request)
+    public function store(XmlUploadRequest $request, XmlService $xmlService)
     {
         $peopleFile = $request->file('people');
         $shipOrdersFile = $request->file('shiporders');
@@ -17,8 +17,6 @@ class XmlUploadController extends Controller
             dispatch(new ProcessXmlFilesJob($peopleFile->get(), $shipOrdersFile->get()));
             return back()->with('success', __('xml-upload.queued'));
         }
-
-        $xmlService = new XmlService;
 
         try {
             $people = $xmlService->parsePeopleXml($peopleFile->get());

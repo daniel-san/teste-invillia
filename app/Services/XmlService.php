@@ -9,7 +9,6 @@ use RuntimeException;
 
 class XmlService
 {
-
     /**
      * Alias for the simplexml_load_string function
      *
@@ -34,13 +33,13 @@ class XmlService
      */
     public function parsePeopleXml($xml)
     {
-        $parsed = $this->parse($xml);
+        $parsedData = $this->parse($xml);
 
         $people = collect();
 
         try {
             DB::beginTransaction();
-            foreach($parsed as $personData) {
+            foreach($parsedData as $personData) {
 
                 if ($person = Person::whereId($personData->personid)->first()) {
                     $people->push($person);
@@ -73,13 +72,13 @@ class XmlService
 
     public function parseShipOrdersXml($xml)
     {
-        $parsed = $this->parse($xml);
+        $parsedData = $this->parse($xml);
 
         $shipOrders = collect();
 
         try {
             DB::beginTransaction();
-            foreach($parsed as $shipOrderData) {
+            foreach($parsedData as $shipOrderData) {
 
                 if ($shipOrder = ShipOrder::whereId($shipOrderData->orderid)->first()) {
                     $shipOrders->push($shipOrders);
@@ -101,8 +100,7 @@ class XmlService
                     'country' => $shipOrderData->shipto->country,
                 ]);
 
-                foreach ($shipOrderData->items->item as $item)
-                {
+                foreach ($shipOrderData->items->item as $item) {
                     $shipOrder->items()->create([
                         'title' => $item->title,
                         'note' => $item->note,

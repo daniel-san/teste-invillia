@@ -120,6 +120,7 @@ The access to these endpoints require an api token of the ```Bearer``` type to b
 ```
 curl -i http://localhost/api/people \
   -H "Authorization: Bearer <token>"
+  -H "Accept: application/json"
 ```
 
 ### Generating a token
