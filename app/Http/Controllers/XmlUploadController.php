@@ -3,23 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\XmlUploadRequest;
+use App\Jobs\ProcessXmlFilesJob;
 use App\Services\XmlService;
-use Illuminate\Http\Request;
 
 class XmlUploadController extends Controller
 {
     public function store(XmlUploadRequest $request)
     {
-        $personsFile = $request->file('persons');
+        $peopleFile = $request->file('people');
         $shipOrdersFile = $request->file('shiporders');
+
+        if ($request->get('async')) {
+            dispatch(new ProcessXmlFilesJob($peopleFile->get(), $shipOrdersFile->get()));
+            return back()->with('success', __('xml-upload.queued'));
+        }
 
         $xmlService = new XmlService;
 
         try {
-            $people = $xmlService->parsePeopleXml($personsFile->get());
+            $people = $xmlService->parsePeopleXml($peopleFile->get());
             $orders = $xmlService->parseShipOrdersXml($shipOrdersFile->get());
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->withErrors($e->getMessage());
         }
 
         return back()->with('success', __('xml-upload.success'));
