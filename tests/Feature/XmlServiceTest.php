@@ -17,6 +17,9 @@ class XmlServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->service = app(XmlService::class);
+
         $this->valid_people_xml = file_get_contents(__DIR__ . '/../stubs/people.xml');
         $this->invalid_people_xml = file_get_contents(__DIR__ . '/../stubs/people_invalid.xml');
         $this->malformed_people_xml = file_get_contents(__DIR__ . '/../stubs/people_malformed.xml');
@@ -29,7 +32,7 @@ class XmlServiceTest extends TestCase
     {
         $xml = $this->valid_people_xml;
 
-        $parsed = (new XmlService)->parse($xml);
+        $parsed = $this->service->parse($xml);
         $this->assertIsObject($parsed);
     }
 
@@ -38,14 +41,14 @@ class XmlServiceTest extends TestCase
         $xml = $this->malformed_people_xml;
 
         $this->expectException(RuntimeException::class);
-        $parsed = (new XmlService)->parse($xml);
+        $parsed = $this->service->parse($xml);
     }
 
     public function test_it_returns_a_collection_of_people_when_processing_people_xml()
     {
         $xml = $this->valid_people_xml;
 
-        $people = (new XmlService)->parsePeopleXml($xml);
+        $people = $this->service->parsePeopleXml($xml);
 
         $this->assertInstanceOf(Collection::class, $people);
         $this->assertContainsOnlyInstancesOf(Person::class, $people);
@@ -57,7 +60,7 @@ class XmlServiceTest extends TestCase
 
         $this->assertDatabaseCount('people', 0);
 
-        $people = (new XmlService)->parsePeopleXml($xml);
+        $people = $this->service->parsePeopleXml($xml);
 
         $this->assertDatabaseCount('people', 3);
         $this->assertDatabaseCount('phones', 5);
@@ -69,11 +72,11 @@ class XmlServiceTest extends TestCase
 
         $this->assertDatabaseCount('people', 0);
 
-        $people = (new XmlService)->parsePeopleXml($xml);
+        $people = $this->service->parsePeopleXml($xml);
 
         $this->assertDatabaseCount('people', 3);
 
-        $people = (new XmlService)->parsePeopleXml($xml);
+        $people = $this->service->parsePeopleXml($xml);
 
         $this->assertDatabaseCount('people', 3);
     }
@@ -84,7 +87,7 @@ class XmlServiceTest extends TestCase
 
         Person::factory(3)->create();
 
-        $shipOrders = (new XmlService)->parseShipOrdersXml($xml);
+        $shipOrders = $this->service->parseShipOrdersXml($xml);
 
         $this->assertInstanceOf(Collection::class, $shipOrders);
         $this->assertContainsOnlyInstancesOf(ShipOrder::class, $shipOrders);
@@ -96,9 +99,28 @@ class XmlServiceTest extends TestCase
 
         Person::factory(3)->create();
 
-        $shipOrders = (new XmlService)->parseShipOrdersXml($shipOrdersXml);
+        $shipOrders = $this->service->parseShipOrdersXml($shipOrdersXml);
 
         $this->assertDatabaseCount('ship_orders', 3);
+        $this->assertDatabaseCount('ship_order_items', 4);
+    }
 
+    public function test_it_will_not_duplicate_shiporders_if_already_exists_in_database()
+    {
+        $xml = $this->valid_shiporders_xml;
+
+        Person::factory(3)->create();
+
+        $this->assertDatabaseCount('ship_orders', 0);
+
+        $orders = $this->service->parseShipOrdersXml($xml);
+
+        $this->assertDatabaseCount('ship_orders', 3);
+        $this->assertDatabaseCount('ship_order_items', 4);
+
+        $orders = $this->service->parseShipOrdersXml($xml);
+
+        $this->assertDatabaseCount('ship_orders', 3);
+        $this->assertDatabaseCount('ship_order_items', 4);
     }
 }

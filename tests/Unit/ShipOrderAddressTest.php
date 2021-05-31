@@ -13,8 +13,8 @@ class ShipOrderAddressTest extends TestCase
 
     public function test_it_belongs_to_a_ship_order()
     {
-        $shipOrderItem = ShipOrderAddress::factory()->create();
+        $shipOrderAddress = ShipOrderAddress::factory()->create();
 
-        $this->assertInstanceOf(ShipOrder::class, $shipOrderItem->shipOrder);
+        $this->assertInstanceOf(ShipOrder::class, $shipOrderAddress->shipOrder);
     }
 }

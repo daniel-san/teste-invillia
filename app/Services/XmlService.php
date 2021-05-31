@@ -4,13 +4,36 @@ namespace App\Services;
 
 use App\Models\Person;
 use App\Models\ShipOrder;
+use App\Repositories\PersonRepository;
+use App\Repositories\Repository;
+use App\Repositories\ShipOrderRepository;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class XmlService
 {
     /**
-     * Alias for the simplexml_load_string function
+     * Person repository instance.
+     *
+     * @var Repository
+     */
+    protected $personRepository;
+
+    /**
+     * ShipOrder repository instance.
+     *
+     * @var Repository
+     */
+    protected $shipOrderRepository;
+
+    public function __construct(PersonRepository $personRepository, ShipOrderRepository $shipOrderRepository)
+    {
+        $this->personRepository = $personRepository;
+        $this->shipOrderRepository = $shipOrderRepository;
+    }
+
+    /**
+     * Alias for the simplexml_load_string function.
      *
      * @throws RuntimeException
      * @return SimpleXMLElement
@@ -27,7 +50,7 @@ class XmlService
     }
 
     /**
-     * Processes a xml file containing Person data into the database
+     * Processes a xml file containing Person data and saves them into the database.
      *
      * @return Collection|Person[]
      */
@@ -40,25 +63,18 @@ class XmlService
         try {
             DB::beginTransaction();
             foreach($parsedData as $personData) {
+                $attributes = $this->translateToPersonAttributes($personData);
 
-                if ($person = Person::whereId($personData->personid)->first()) {
-                    $people->push($person);
+                if ($person = $this->personRepository->find($attributes['id'])) {
+                    $people->push(
+                        $this->personRepository->update($person, $attributes)
+                    );
                     continue;
                 }
 
-                $person = new Person();
-                $person->id = $personData->personid;
-                $person->name = $personData->personname;
-
                 $people->push(
-                    tap($person)->save()
+                    $this->personRepository->create($attributes)
                 );
-
-                foreach ($personData->phones->phone as $phone) {
-                    $person->phones()->create([
-                        'number' => $phone
-                    ]);
-                }
             }
 
             DB::commit();
@@ -70,6 +86,12 @@ class XmlService
         return $people;
     }
 
+
+    /**
+     * Processes a xml file containing ShipOrder data and saves them into the database.
+     *
+     * @return Collection|ShipOrder[]
+     */
     public function parseShipOrdersXml($xml)
     {
         $parsedData = $this->parse($xml);
@@ -79,35 +101,18 @@ class XmlService
         try {
             DB::beginTransaction();
             foreach($parsedData as $shipOrderData) {
+                $attributes = $this->translateToShipOrderAttributes($shipOrderData);
 
-                if ($shipOrder = ShipOrder::whereId($shipOrderData->orderid)->first()) {
-                    $shipOrders->push($shipOrders);
+                if ($shipOrder = $this->shipOrderRepository->find($attributes['id'])) {
+                    $shipOrders->push(
+                        $this->shipOrderRepository->update($shipOrder, $attributes)
+                    );
                     continue;
                 }
 
-                $shipOrder = new ShipOrder();
-                $shipOrder->id = $shipOrderData->orderid;
-                $shipOrder->person_id = $shipOrderData->orderperson;
-
                 $shipOrders->push(
-                    tap($shipOrder)->save()
+                    $this->shipOrderRepository->create($attributes)
                 );
-
-                $shipOrder->address()->create([
-                    'name' => $shipOrderData->shipto->name,
-                    'address' => $shipOrderData->shipto->address,
-                    'city' => $shipOrderData->shipto->city,
-                    'country' => $shipOrderData->shipto->country,
-                ]);
-
-                foreach ($shipOrderData->items->item as $item) {
-                    $shipOrder->items()->create([
-                        'title' => $item->title,
-                        'note' => $item->note,
-                        'quantity' => intval($item->quantity),
-                        'price' => floatval($item->price),
-                    ]);
-                }
             }
 
             DB::commit();
@@ -117,5 +122,60 @@ class XmlService
         }
 
         return $shipOrders;
+    }
+
+    /**
+     * Translate a SimpleXMLElement with person data to an array with Person attributes.
+     *
+     * @param SimpleXMLElement $personXml
+     * @return array
+     */
+    protected function translateToPersonAttributes($personXml)
+    {
+        $phones = [];
+
+        foreach($personXml->phones->phone as $phone) {
+            $phones[] = ['number' => $phone];
+        }
+
+        return [
+            'id' => $personXml->personid,
+            'name' => $personXml->personname,
+            'phones' => $phones
+        ];
+    }
+
+    /**
+     * Translate a SimpleXMLElement with ship order data to an array with ShipOrder attributes.
+     *
+     * @param SimpleXMLElement $shipOrderXml
+     * @return array
+     */
+    protected function translateToShipOrderAttributes($shipOrderXml)
+    {
+        $address = [
+            'name' => $shipOrderXml->shipto->name,
+            'address' => $shipOrderXml->shipto->address,
+            'city' => $shipOrderXml->shipto->city,
+            'country' => $shipOrderXml->shipto->country,
+        ];
+
+        $items = [];
+
+        foreach($shipOrderXml->items->item as $item) {
+            $items[] = [
+                'title' => $item->title,
+                'note' => $item->note,
+                'quantity' => intval($item->quantity),
+                'price' => floatval($item->price),
+            ];
+        }
+
+        return [
+            'id' => $shipOrderXml->orderid,
+            'person_id' => $shipOrderXml->orderperson,
+            'address' => $address,
+            'items' => $items
+        ];
     }
 }

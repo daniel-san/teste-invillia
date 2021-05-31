@@ -24,7 +24,7 @@ class ShipOrderAddressFactory extends Factory
     {
         return [
             'ship_order_id' => ShipOrder::factory(),
-            'name' => $this->faker->name,
+            'name' => $this->faker->name(),
             'address' => $this->faker->sentence,
             'city' => $this->faker->city,
             'country' => $this->faker->country
