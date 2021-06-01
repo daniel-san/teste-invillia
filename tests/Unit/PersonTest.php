@@ -27,4 +27,12 @@ class PersonTest extends TestCase
         $this->assertCount(3, $person->shipOrders);
         $this->assertContainsOnlyInstancesOf(ShipOrder::class, $person->shipOrders);
     }
+
+    public function test_it_can_be_soft_deleted()
+    {
+        $person = Person::factory()->create();
+        $person->delete();
+
+        $this->assertNotNull($person->deleted_at);
+    }
 }

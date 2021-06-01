@@ -5,6 +5,7 @@ Below will be instructions on how to install and run the application, as well as
 
 # Technologies used
 The following technologies were used during development:
+- Docker
 - Laravel
 - MySql
 - Redis
@@ -64,7 +65,7 @@ sail up laravel.test mysql redis
 or
 sail up -d laravel.test mysql redis
 ```
-The first execution of this command will take some time while docker builds the containers for the web application, mysql and redis.
+The first execution of this command will take some time while docker builds the containers for the web application, mysql and redis. If the build fails, try running the command again in case it failed due to a network issue during the build process.
 
 ```laravel.test``` is the name of the service created inside the ```docker-compose.yml``` file.
 This name can be configured, along with other values that are used during the creation of the containers when using ```sail```, inside the ```.env``` file:
@@ -87,7 +88,12 @@ After this rebuild the containers, if they were already built:
 ```
 sudo ./vendor/bin/sail build laravel.test mysql redis
 ```
-Now the application should run without any issues. 
+Now the application should run without any issues.
+
+If you aliased the sail script, it will not work when running with ```sudo``` due to user specific aliases not being available to ```root```. In this case, run the script by using its full path:
+```
+sudo ./vendor/bin/sail ...
+```
 
 ## Migrating the database
 Resuming the installation, migrate the database:
@@ -144,3 +150,5 @@ The automated tests can be ran with the following command:
 ```
 sail artisan test
 ```
+The stub files used inside the tests can also be used to test the application in the browser.
+They are located at ```tests/stubs/```.
