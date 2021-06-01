@@ -27,7 +27,43 @@ class ShipOrdersXml implements Rule
         return true;
     }
 
+    /**
+     * Verify if the passed xml is valid.
+     *
+     * @param string $xml
+     * @throws ValidationException
+     * @return array
+     */
     protected function validateXml($xml)
+    {
+        $shipOrdersArray = $this->prepareDataForValidation($xml);
+
+        $rules = [
+            '*.orderid' => 'numeric',
+            '*.orderperson' => 'numeric',
+            '*.shipto.name' => 'string',
+            '*.shipto.address' => 'string',
+            '*.shipto.city' => 'string',
+            '*.shipto.country' => 'string',
+            '*.items.item.*.title' => 'string',
+            '*.items.item.*.note' => 'string',
+            '*.items.item.*.quantity' => 'numeric',
+            '*.items.item.*.price' => 'numeric'
+        ];
+
+        $validator = Validator::make($shipOrdersArray, $rules);
+
+        return $validator->validate();
+    }
+
+    /**
+     * Prepare the data from the xml for validation.
+     *
+     * @param string $xml
+     * @return array
+     */
+
+    protected function prepareDataForValidation($xml)
     {
         $parsedOrders = json_encode(simplexml_load_string($xml));
         $shipOrdersArray = json_decode($parsedOrders, true);
@@ -49,22 +85,7 @@ class ShipOrdersXml implements Rule
             }
         }
 
-        $rules = [
-            '*.orderid' => 'numeric',
-            '*.orderperson' => 'numeric',
-            '*.shipto.name' => 'string',
-            '*.shipto.address' => 'string',
-            '*.shipto.city' => 'string',
-            '*.shipto.country' => 'string',
-            '*.items.item.*.title' => 'string',
-            '*.items.item.*.note' => 'string',
-            '*.items.item.*.quantity' => 'numeric',
-            '*.items.item.*.price' => 'numeric'
-        ];
-
-        $validator = Validator::make($shipOrdersArray, $rules);
-
-        return $validator->validate();
+        return $shipOrdersArray;
     }
 
     /**

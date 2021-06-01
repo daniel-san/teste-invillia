@@ -63,7 +63,7 @@ class XmlService
         try {
             DB::beginTransaction();
             foreach($parsedData as $personData) {
-                $attributes = $this->translateToPersonAttributes($personData);
+                $attributes = Person::attributesFromXml($personData);
 
                 if ($person = $this->personRepository->find($attributes['id'])) {
                     $people->push(
@@ -101,7 +101,7 @@ class XmlService
         try {
             DB::beginTransaction();
             foreach($parsedData as $shipOrderData) {
-                $attributes = $this->translateToShipOrderAttributes($shipOrderData);
+                $attributes = ShipOrder::attributesFromXml($shipOrderData);
 
                 if ($shipOrder = $this->shipOrderRepository->find($attributes['id'])) {
                     $shipOrders->push(
@@ -122,60 +122,5 @@ class XmlService
         }
 
         return $shipOrders;
-    }
-
-    /**
-     * Translate a SimpleXMLElement with person data to an array with Person attributes.
-     *
-     * @param SimpleXMLElement $personXml
-     * @return array
-     */
-    protected function translateToPersonAttributes($personXml)
-    {
-        $phones = [];
-
-        foreach($personXml->phones->phone as $phone) {
-            $phones[] = ['number' => $phone];
-        }
-
-        return [
-            'id' => $personXml->personid,
-            'name' => $personXml->personname,
-            'phones' => $phones
-        ];
-    }
-
-    /**
-     * Translate a SimpleXMLElement with ship order data to an array with ShipOrder attributes.
-     *
-     * @param SimpleXMLElement $shipOrderXml
-     * @return array
-     */
-    protected function translateToShipOrderAttributes($shipOrderXml)
-    {
-        $address = [
-            'name' => $shipOrderXml->shipto->name,
-            'address' => $shipOrderXml->shipto->address,
-            'city' => $shipOrderXml->shipto->city,
-            'country' => $shipOrderXml->shipto->country,
-        ];
-
-        $items = [];
-
-        foreach($shipOrderXml->items->item as $item) {
-            $items[] = [
-                'title' => $item->title,
-                'note' => $item->note,
-                'quantity' => intval($item->quantity),
-                'price' => floatval($item->price),
-            ];
-        }
-
-        return [
-            'id' => $shipOrderXml->orderid,
-            'person_id' => $shipOrderXml->orderperson,
-            'address' => $address,
-            'items' => $items
-        ];
     }
 }

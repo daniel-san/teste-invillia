@@ -20,4 +20,25 @@ class Person extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Generates a DTO with the data from a SimpleXMLElement object.
+     *
+     * @param SimpleXMLElement $personXml
+     * @return array
+     */
+    public static function attributesFromXml($personXml)
+    {
+        $phones = [];
+
+        foreach($personXml->phones->phone as $phone) {
+            $phones[] = ['number' => $phone];
+        }
+
+        return [
+            'id' => $personXml->personid,
+            'name' => $personXml->personname,
+            'phones' => $phones
+        ];
+    }
 }
