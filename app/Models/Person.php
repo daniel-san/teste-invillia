@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\XmlDtoGeneratorContract;
 use App\Models\Relations\HasManyPhones;
+use App\Models\Relations\HasManyShipOrders;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,6 +12,7 @@ class Person extends Model implements XmlDtoGeneratorContract
 {
     use HasFactory;
     use HasManyPhones;
+    use HasManyShipOrders;
 
     protected $fillable = [
         'id',
