@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Contracts\XmlDtoGeneratorContract;
 use App\Models\Person;
 use App\Models\ShipOrder;
 use App\Repositories\PersonRepository;
@@ -50,31 +51,30 @@ class XmlService
     }
 
     /**
-     * Processes a xml file containing Person data and saves them into the database.
+     * Process a xml string and save its contents to the database.
      *
-     * @return Collection|Person[]
+     * @param string $xml
+     * @param Repository $repository
+     * @param XmlDtoGeneratorContract $dtoGenerator
+     * @return Collection|Model[]
      */
-    public function parsePeopleXml($xml)
+    public function processXml($xml, Repository $repository, XmlDtoGeneratorContract $dtoGenerator)
     {
         $parsedData = $this->parse($xml);
 
-        $people = collect();
+        $entities = collect();
 
         try {
             DB::beginTransaction();
-            foreach($parsedData as $personData) {
-                $attributes = Person::attributesFromXml($personData);
+            foreach($parsedData as $entityData) {
+                $attributes = $dtoGenerator->getAttributesFromXml($entityData);
 
-                if ($person = $this->personRepository->find($attributes['id'])) {
-                    $people->push(
-                        $this->personRepository->update($person, $attributes)
-                    );
+                if ($entity = $repository->find($attributes['id'])) {
+                    $entities->push($repository->update($entity, $attributes));
                     continue;
                 }
 
-                $people->push(
-                    $this->personRepository->create($attributes)
-                );
+                $entities->push($repository->create($attributes));
             }
 
             DB::commit();
@@ -83,7 +83,17 @@ class XmlService
             throw $e;
         }
 
-        return $people;
+        return $entities;
+    }
+
+    /**
+     * Processes a xml file containing Person data and saves them into the database.
+     *
+     * @return Collection|Person[]
+     */
+    public function parsePeopleXml($xml)
+    {
+        return $this->processXml($xml, $this->personRepository, new Person);
     }
 
 
@@ -94,33 +104,6 @@ class XmlService
      */
     public function parseShipOrdersXml($xml)
     {
-        $parsedData = $this->parse($xml);
-
-        $shipOrders = collect();
-
-        try {
-            DB::beginTransaction();
-            foreach($parsedData as $shipOrderData) {
-                $attributes = ShipOrder::attributesFromXml($shipOrderData);
-
-                if ($shipOrder = $this->shipOrderRepository->find($attributes['id'])) {
-                    $shipOrders->push(
-                        $this->shipOrderRepository->update($shipOrder, $attributes)
-                    );
-                    continue;
-                }
-
-                $shipOrders->push(
-                    $this->shipOrderRepository->create($attributes)
-                );
-            }
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-
-        return $shipOrders;
+        return $this->processXml($xml, $this->shipOrderRepository, new ShipOrder);
     }
 }

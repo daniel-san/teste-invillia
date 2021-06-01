@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Contracts\XmlDtoGeneratorContract;
 use App\Models\Relations\BelongsToPerson;
 use App\Models\Relations\HasManyShipOrderItems;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ShipOrder extends Model
+class ShipOrder extends Model implements XmlDtoGeneratorContract
 {
     use HasFactory;
     use BelongsToPerson;
@@ -29,7 +30,18 @@ class ShipOrder extends Model
      * @param SimpleXMLElement $shipOrderXml
      * @return array
      */
-    public static function attributesFromXml($shipOrderXml)
+    public static function attributesFromXml($xml)
+    {
+        return (new static)->getAttributesFromXml($xml);
+    }
+
+    /**
+     * Generates a DTO with the data from a SimpleXMLElement object.
+     *
+     * @param SimpleXMLElement $shipOrderXml
+     * @return array
+     */
+    public function getAttributesFromXml($shipOrderXml)
     {
         $address = [
             'name' => $shipOrderXml->shipto->name,

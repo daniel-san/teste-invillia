@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Contracts\XmlDtoGeneratorContract;
 use App\Models\Relations\HasManyPhones;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Person extends Model
+class Person extends Model implements XmlDtoGeneratorContract
 {
     use HasFactory;
     use HasManyPhones;
@@ -24,10 +25,21 @@ class Person extends Model
     /**
      * Generates a DTO with the data from a SimpleXMLElement object.
      *
+     * @param SimpleXMLElement $shipOrderXml
+     * @return array
+     */
+    public static function attributesFromXml($xml)
+    {
+        return (new static)->getAttributesFromXml($xml);
+    }
+
+    /**
+     * Generates a DTO with the data from a SimpleXMLElement object.
+     *
      * @param SimpleXMLElement $personXml
      * @return array
      */
-    public static function attributesFromXml($personXml)
+    public function getAttributesFromXml($personXml)
     {
         $phones = [];
 

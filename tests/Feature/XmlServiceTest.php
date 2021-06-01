@@ -20,17 +20,17 @@ class XmlServiceTest extends TestCase
 
         $this->service = app(XmlService::class);
 
-        $this->valid_people_xml = file_get_contents(__DIR__ . '/../stubs/people.xml');
-        $this->invalid_people_xml = file_get_contents(__DIR__ . '/../stubs/people_invalid.xml');
-        $this->malformed_people_xml = file_get_contents(__DIR__ . '/../stubs/people_malformed.xml');
+        $this->validPeopleXml = file_get_contents(__DIR__ . '/../stubs/people.xml');
+        $this->invalidPeopleXml = file_get_contents(__DIR__ . '/../stubs/people_invalid.xml');
+        $this->malformedPeopleXml = file_get_contents(__DIR__ . '/../stubs/people_malformed.xml');
 
-        $this->valid_shiporders_xml = file_get_contents(__DIR__ . '/../stubs/shiporders.xml');
-        $this->invalid_shiporders_xml = file_get_contents(__DIR__ . '/../stubs/shiporders_invalid.xml');
+        $this->validShipOrdersXml = file_get_contents(__DIR__ . '/../stubs/shiporders.xml');
+        $this->invalidShipOrdersXml = file_get_contents(__DIR__ . '/../stubs/shiporders_invalid.xml');
     }
 
     public function test_it_parses_a_xml_string()
     {
-        $xml = $this->valid_people_xml;
+        $xml = $this->validPeopleXml;
 
         $parsed = $this->service->parse($xml);
         $this->assertIsObject($parsed);
@@ -38,7 +38,7 @@ class XmlServiceTest extends TestCase
 
     public function test_it_throws_an_exception_when_xml_is_malformed()
     {
-        $xml = $this->malformed_people_xml;
+        $xml = $this->malformedPeopleXml;
 
         $this->expectException(RuntimeException::class);
         $parsed = $this->service->parse($xml);
@@ -46,7 +46,7 @@ class XmlServiceTest extends TestCase
 
     public function test_it_returns_a_collection_of_people_when_processing_people_xml()
     {
-        $xml = $this->valid_people_xml;
+        $xml = $this->validPeopleXml;
 
         $people = $this->service->parsePeopleXml($xml);
 
@@ -56,7 +56,7 @@ class XmlServiceTest extends TestCase
 
     public function test_it_stores_people_xml_data_into_database()
     {
-        $xml = $this->valid_people_xml;
+        $xml = $this->validPeopleXml;
 
         $this->assertDatabaseCount('people', 0);
 
@@ -68,7 +68,7 @@ class XmlServiceTest extends TestCase
 
     public function test_it_will_not_duplicate_person_if_already_exists_in_database()
     {
-        $xml = $this->valid_people_xml;
+        $xml = $this->validPeopleXml;
 
         $this->assertDatabaseCount('people', 0);
 
@@ -83,7 +83,7 @@ class XmlServiceTest extends TestCase
 
     public function test_it_returns_a_collection_of_shiporders_when_processing_shiporder_xml()
     {
-        $xml = $this->valid_shiporders_xml;
+        $xml = $this->validShipOrdersXml;
 
         Person::factory(3)->create();
 
@@ -95,7 +95,7 @@ class XmlServiceTest extends TestCase
 
     public function test_it_stores_shiporders_xml_data_into_database()
     {
-        $shipOrdersXml = $this->valid_shiporders_xml;
+        $shipOrdersXml = $this->validShipOrdersXml;
 
         Person::factory(3)->create();
 
@@ -107,7 +107,7 @@ class XmlServiceTest extends TestCase
 
     public function test_it_will_not_duplicate_shiporders_if_already_exists_in_database()
     {
-        $xml = $this->valid_shiporders_xml;
+        $xml = $this->validShipOrdersXml;
 
         Person::factory(3)->create();
 
