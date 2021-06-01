@@ -42,4 +42,15 @@ class ShipOrderTest extends TestCase
         $this->assertCount(3, $shipOrder->items);
         $this->assertContainsOnlyInstancesOf(ShipOrderItem::class, $shipOrder->items);
     }
+
+    public function test_it_can_be_soft_deleted()
+    {
+        $shipOrder = ShipOrder::factory()
+            ->for(Person::factory())
+            ->create();
+
+        $shipOrder->delete();
+
+        $this->assertNotNull($shipOrder->deleted_at);
+    }
 }

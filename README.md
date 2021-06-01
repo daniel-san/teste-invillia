@@ -5,6 +5,7 @@ Below will be instructions on how to install and run the application, as well as
 
 # Technologies used
 The following technologies were used during development:
+- Docker
 - Laravel
 - MySql
 - Redis
@@ -51,7 +52,10 @@ is the same as running this:
 docker-compose up -d
 ```
 
-For convenience, throughout this document ```sail``` will be used when running commands like ```artisan migrate```, but the ```docker-compose``` counterparts can be run without any issues.
+For convenience, throughout this document ```sail``` will be used when running commands like ```artisan migrate```, but the ```docker-compose``` counterparts can be run without any issues:
+```
+docker-compose exec -u sail laravel.test php artisan migrate
+```
 It's recomended to alias the sail script to easily run commands:
 ```
 alias sail='bash vendor/bin/sail'
@@ -62,9 +66,9 @@ The application can be started using ```sail``` by running the command:
 ```
 sail up laravel.test mysql redis
 or
-sail up -d laravel.test mysql redis
+sail up -d laravel.test mysql redis #start in the background
 ```
-The first execution of this command will take some time while docker builds the containers for the web application, mysql and redis.
+The first execution of this command will take some time while docker builds the containers for the web application, mysql and redis. If the build fails, try running the command again in case it failed due to a network issue during the build process.
 
 ```laravel.test``` is the name of the service created inside the ```docker-compose.yml``` file.
 This name can be configured, along with other values that are used during the creation of the containers when using ```sail```, inside the ```.env``` file:
@@ -87,7 +91,12 @@ After this rebuild the containers, if they were already built:
 ```
 sudo ./vendor/bin/sail build laravel.test mysql redis
 ```
-Now the application should run without any issues. 
+Now the application should run without any issues.
+
+If you aliased the sail script, it will not work when running with ```sudo``` due to user specific aliases not being available to the ```root``` user. In this case, run the script by using its full path:
+```
+sudo ./vendor/bin/sail ...
+```
 
 ## Migrating the database
 Resuming the installation, migrate the database:
@@ -133,7 +142,7 @@ Users can also register and login through the API using the following routes:
 # API documentation
 The project includes an API documentation using the OpenAPI spec. The files containing the documentation are ```apidoc.yaml``` and ```apidoc.json```.
 
-The following command creates a docker container that can be used to view the documentation in the browser:
+The following command creates a temporary docker container that can be used to view the documentation in the browser:
 ```
 docker run --rm  -p 8080:8080 -e SWAGGER_JSON=/doc/apidoc.json -v $PWD:/doc swaggerapi/swagger-ui
 ```
@@ -144,3 +153,5 @@ The automated tests can be ran with the following command:
 ```
 sail artisan test
 ```
+The stub files used inside the tests can also be used to test the application in the browser.
+They are located at ```tests/stubs/```.
