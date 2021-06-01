@@ -63,7 +63,7 @@ class PeopleXml implements Rule
 
         $peopleArray = collect($peopleArray)->first();
 
-        foreach($peopleArray as $key => $person) {
+        foreach ($peopleArray as $key => $person) {
             $phones = data_get($person, 'phones');
 
             if (!is_array($phones['phone'])) {

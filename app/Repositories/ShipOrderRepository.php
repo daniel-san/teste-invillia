@@ -33,7 +33,7 @@ class ShipOrderRepository extends Repository
         }
 
         $itemIds = [];
-        foreach($items as $item) {
+        foreach ($items as $item) {
             $item = $resource->items()->create($item);
             $itemIds[] = $item->id;
         }

@@ -66,7 +66,7 @@ class XmlService
 
         try {
             DB::beginTransaction();
-            foreach($parsedData as $entityData) {
+            foreach ($parsedData as $entityData) {
                 $attributes = $dtoGenerator->getAttributesFromXml($entityData);
 
                 if ($entity = $repository->find($attributes['id'])) {
@@ -93,7 +93,7 @@ class XmlService
      */
     public function parsePeopleXml($xml)
     {
-        return $this->processXml($xml, $this->personRepository, new Person);
+        return $this->processXml($xml, $this->personRepository, new Person());
     }
 
 
@@ -104,6 +104,6 @@ class XmlService
      */
     public function parseShipOrdersXml($xml)
     {
-        return $this->processXml($xml, $this->shipOrderRepository, new ShipOrder);
+        return $this->processXml($xml, $this->shipOrderRepository, new ShipOrder());
     }
 }

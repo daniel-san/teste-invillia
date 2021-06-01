@@ -52,7 +52,7 @@ class ShipOrder extends Model implements XmlDtoGeneratorContract
 
         $items = [];
 
-        foreach($shipOrderXml->items->item as $item) {
+        foreach ($shipOrderXml->items->item as $item) {
             $items[] = [
                 'title' => $item->title,
                 'note' => $item->note,

@@ -27,8 +27,8 @@ class PersonRepository extends Repository
 
         $newPhoneIds = [];
 
-        foreach($phones as $phone) {
-            $newPhone = new Phone;
+        foreach ($phones as $phone) {
+            $newPhone = new Phone();
 
             $newPhone->person_id = $resource->id;
             $newPhone->number = data_get($phone, 'number');

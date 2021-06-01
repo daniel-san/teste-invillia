@@ -43,7 +43,7 @@ class Person extends Model implements XmlDtoGeneratorContract
     {
         $phones = [];
 
-        foreach($personXml->phones->phone as $phone) {
+        foreach ($personXml->phones->phone as $phone) {
             $phones[] = ['number' => $phone];
         }
 

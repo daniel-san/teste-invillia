@@ -62,7 +62,6 @@ class ShipOrdersXml implements Rule
      * @param string $xml
      * @return array
      */
-
     protected function prepareDataForValidation($xml)
     {
         $parsedOrders = json_encode(simplexml_load_string($xml));
@@ -70,7 +69,7 @@ class ShipOrdersXml implements Rule
 
         $shipOrdersArray = collect($shipOrdersArray)->first();
 
-        foreach($shipOrdersArray as $key => $order) {
+        foreach ($shipOrdersArray as $key => $order) {
 
             $items = data_get($order, 'items.item');
             if(empty(array_filter($items, 'is_array'))) {
