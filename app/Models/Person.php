@@ -7,12 +7,14 @@ use App\Models\Relations\HasManyPhones;
 use App\Models\Relations\HasManyShipOrders;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Person extends Model implements XmlDtoGeneratorContract
 {
     use HasFactory;
     use HasManyPhones;
     use HasManyShipOrders;
+    use SoftDeletes;
 
     protected $fillable = [
         'id',

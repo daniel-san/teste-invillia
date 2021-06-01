@@ -7,12 +7,14 @@ use App\Models\Relations\BelongsToPerson;
 use App\Models\Relations\HasManyShipOrderItems;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ShipOrder extends Model implements XmlDtoGeneratorContract
 {
     use HasFactory;
     use BelongsToPerson;
     use HasManyShipOrderItems;
+    use SoftDeletes;
 
     protected $fillable = [
         'id',
