@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use Exception;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -21,7 +22,9 @@ class PeopleXml implements Rule
 
         try {
             $this->validateXml($peopleXml);
-        } catch (\Exception $e) {
+        } catch (ValidationException $e) {
+            return false;
+        } catch (Exception $e) {
             return false;
         }
 

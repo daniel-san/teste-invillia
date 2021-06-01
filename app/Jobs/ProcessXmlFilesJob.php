@@ -14,8 +14,13 @@ class ProcessXmlFilesJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /** @var string */
     protected $peopleXml;
+
+    /** @var string */
     protected $shipOrdersXml;
+
+    public $tries = 5;
 
     /**
      * Create a new job instance.

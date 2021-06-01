@@ -2,8 +2,10 @@
 
 namespace App\Rules;
 
+use Exception;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class ShipOrdersXml implements Rule
 {
@@ -20,7 +22,9 @@ class ShipOrdersXml implements Rule
 
         try {
             $this->validateXml($shipOrdersXml);
-        } catch (\Exception $e) {
+        } catch (ValidationException $e) {
+            return false;
+        } catch (Exception $e) {
             return false;
         }
 
@@ -70,9 +74,8 @@ class ShipOrdersXml implements Rule
         $shipOrdersArray = collect($shipOrdersArray)->first();
 
         foreach ($shipOrdersArray as $key => $order) {
-
             $items = data_get($order, 'items.item');
-            if(empty(array_filter($items, 'is_array'))) {
+            if (empty(array_filter($items, 'is_array'))) {
                 $normalizedItem = [[
                     'title' => $items['title'],
                     'note' => $items['note'],

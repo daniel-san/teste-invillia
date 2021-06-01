@@ -8,6 +8,7 @@ use App\Models\ShipOrder;
 use App\Repositories\PersonRepository;
 use App\Repositories\Repository;
 use App\Repositories\ShipOrderRepository;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -43,7 +44,7 @@ class XmlService
     {
         try {
             $parsedXml = simplexml_load_string($xml);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new RuntimeException("Xml file is invalid");
         }
 
@@ -78,7 +79,7 @@ class XmlService
             }
 
             DB::commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollback();
             throw $e;
         }
@@ -87,7 +88,7 @@ class XmlService
     }
 
     /**
-     * Processes a xml file containing Person data and saves them into the database.
+     * Processes a xml containing Person data and saves them into the database.
      *
      * @return Collection|Person[]
      */
@@ -98,7 +99,7 @@ class XmlService
 
 
     /**
-     * Processes a xml file containing ShipOrder data and saves them into the database.
+     * Processes a file containing ShipOrder data and saves them into the database.
      *
      * @return Collection|ShipOrder[]
      */

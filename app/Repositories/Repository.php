@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\DB;
 abstract class Repository
 {
     /**
-     * Type of the resource to manage.
+     * Type of the resource being managed.
      *
      * @var string
      */
     protected $resourceType = Model::class;
 
     /**
-     * Get resource instance.
+     * Get a new resource instance.
      *
      * @return Model
      */
@@ -69,7 +69,7 @@ abstract class Repository
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created resource in the database.
      *
      * @param array $attributes
      * @return Model
@@ -88,7 +88,7 @@ abstract class Repository
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified resource in the database.
      *
      * @param Model $resource
      * @param array $attributes
@@ -108,7 +108,7 @@ abstract class Repository
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from the database.
      *
      * @param Model $resource
      * @return Model
@@ -154,7 +154,7 @@ abstract class Repository
     }
 
     /**
-     * Handles model after save.
+     * Handles resource after save.
      *
      * @param Model $resource
      * @param array $attributes
@@ -166,7 +166,7 @@ abstract class Repository
     }
 
     /**
-     * Handles model after create.
+     * Handles resource after create.
      *
      * @param Model $resource
      * @param array $attributes
@@ -178,7 +178,7 @@ abstract class Repository
     }
 
     /**
-     * Handles model after update.
+     * Handles resource after update.
      *
      * @param Model $resource
      * @param array $attributes
@@ -188,5 +188,4 @@ abstract class Repository
     {
         return $this->afterSave($resource, $attributes);
     }
-
 }

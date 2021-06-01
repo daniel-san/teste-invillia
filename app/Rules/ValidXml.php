@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use Exception;
 use Illuminate\Contracts\Validation\Rule;
 
 class ValidXml implements Rule
@@ -19,7 +20,7 @@ class ValidXml implements Rule
 
         try {
             $xml = simplexml_load_string($xmlString);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return false;
         }
 
