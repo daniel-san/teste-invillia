@@ -1,62 +1,157 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# What is this repo?
+This repo contains the code for the senior developer test from Invillia.
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Below will be instructions on how to install and run the application, as well as other useful information.
 
-## About Laravel
+# Technologies used
+The following technologies were used during development:
+- Docker
+- Laravel
+- MySql
+- Redis
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+# Installation
+After cloning the project, install the project dependencies with composer:
+```
+composer install
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Configuring the environment
+After the dependencies installation is finished, create a new ```.env``` file by copying the ```.env.example``` file, and then generating the application key:
+```
+cp .env.example .env
+php artisan key:generate
+```
 
-## Learning Laravel
+Inside the ```.env``` file you can place the needed info for the Database connection, as well as other information that might be needed:
+```
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=teste_invillia
+DB_USERNAME=sail
+DB_PASSWORD=password
+```
+The info above is what was used during the development. If you're not running the application from inside a ```docker-compose``` network, variables like ```DB_HOST``` should be changed to the actual address of the database, queue, etc..
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Docker containers and Laravel Sail
+The main ```docker-compose.yml``` file is in the root of the project.
+[Laravel Sail](https://github.com/laravel/sail) was used to run the containers needed for the application. It acts mostly as a helper to run commands inside the containers created by docker. For example, you can run artisan commands inside the main application container like this:
+```
+./vendor/bin/sail artisan migrate
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+In the end it proxies ```docker-compose``` commands to the ```docker-compose``` binary, so this:
+```
+#alias sail="./vendor/bin/sail"
+sail up -d
+```
+is the same as running this:
+```
+docker-compose up -d
+```
 
-## Laravel Sponsors
+For convenience, throughout this document ```sail``` will be used when running commands like ```artisan migrate```, but the ```docker-compose``` counterparts can be run without any issues:
+```
+docker-compose exec -u sail laravel.test php artisan migrate
+```
+It's recomended to alias the sail script to easily run commands:
+```
+alias sail='bash vendor/bin/sail'
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## Starting the application 
+The application can be started using ```sail``` by running the command:
+```
+sail up laravel.test mysql redis
+or
+sail up -d laravel.test mysql redis #start in the background
+```
+The first execution of this command will take some time while docker builds the containers for the web application, mysql and redis. If the build fails, try running the command again in case it failed due to a network issue during the build process.
 
-### Premium Partners
+```laravel.test``` is the name of the service created inside the ```docker-compose.yml``` file.
+This name can be configured, along with other values that are used during the creation of the containers when using ```sail```, inside the ```.env``` file:
+```
+APP_PORT=80
+APP_SERVICE="laravel.test"
+DB_PORT=3306
+WWWUSER=
+WWWGROUP=
+```
+The ```APP_SERVICE``` variable defines which container/service is the one running the application, and '```laravel.test``` is the default value if not defined.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
+### Running ```sail``` as root with ```sudo```
+If your main user doesn't have permissions to run docker without ```sudo```, running ```sail``` commands as root might cause issues with the application container related to folder permissions. In this case, you should overwrite the ```WWWUSER``` and ```WWWGROUP``` variables inside the ```.env``` file, like this:
+```
+WWWUSER=1000 #run 'echo $UID' to get your user id
+WWWGROUP=1000 #run 'id -g' to get your user group id
+```
+After this rebuild the containers, if they were already built:
+```
+sudo ./vendor/bin/sail build laravel.test mysql redis
+```
+Now the application should run without any issues.
 
-## Contributing
+If you aliased the sail script, it will not work when running with ```sudo``` due to user specific aliases not being available to the ```root``` user. In this case, run the script by using its full path:
+```
+sudo ./vendor/bin/sail ...
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Migrating the database
+Resuming the installation, migrate the database:
+```
+sail artisan migrate
+```
 
-## Code of Conduct
+## Starting the queue worker
+For the feature of proccessing the xml files in the background to work, the queue worker needs to be started:
+```
+sail artisan queue:work
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Using the application
+The main page of the application is the [root page](http://localhost), where a form is displayed allowing the upload of 2 XML files: 1 for people and 1 for ship orders.
+The files uploaded go through the following validations:
+  - Validate that the XML file is not malformed;
+  - Validate that data inside the file is valid;
+    - For example, the phone number field of the people XML file must be numeric. Otherwise the file is invalid;
 
-## Security Vulnerabilities
+If both files are valid, then they are processed and the results stored into the database.
+If the "Run in the background" option is checked, the files are proccessed in a queue.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## The API
+After processing the files, the data processed can be accessed through the following api routes:
+  - ```/api/people``` - This route returns all the people as json;
+  - ```/api/ship-orders``` - This route returns all the ship orders as json;
 
-## License
+The access to these endpoints require an api token of the ```Bearer``` type to be sent in the header of the request. Example with ```curl```:
+```
+curl -i http://localhost/api/people \
+  -H "Authorization: Bearer <token>"
+  -H "Accept: application/json"
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Generating a token
+A user can generate a token through the browser after user registration through the route [```/register```](http://localhost/register) and then generating a token by clicking at the menu and selecting the "[API Tokens](http://localhost/user/api-tokens)" option.
+
+Users can also register and login through the API using the following routes:
+  - ```/api/register``` - This route registers the user using its name, email and password;
+  - ```/api/login``` - This route authenticates the user in using its email and password, and returns an api token in the response;
+
+# API documentation
+The project includes an API documentation using the OpenAPI spec. The files containing the documentation are ```apidoc.yaml``` and ```apidoc.json```.
+
+The following command creates a temporary docker container that can be used to view the documentation in the browser:
+```
+docker run --rm  -p 8080:8080 -e SWAGGER_JSON=/doc/apidoc.json -v $PWD:/doc swaggerapi/swagger-ui
+```
+The command must be run at the project folder root. Then the documentation can be viewed in the browser at [http://localhost:8080](http://localhost:8080).
+
+# Automated tests
+The automated tests can be ran with the following command:
+```
+sail artisan test
+```
+The stub files used inside the tests can also be used to test the application in the browser.
+They are located at ```tests/stubs/```.

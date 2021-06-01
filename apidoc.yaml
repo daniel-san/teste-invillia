@@ -1,0 +1,237 @@
+swagger: "2.0"
+info:
+  description: "This is an api for People and Ship orders"
+  version: "1.0.0"
+  title: "People and Ship orders api"
+  contact:
+    email: "dlsbdaniel@gmail.com"
+tags:
+- name: "people"
+  description: "Endpoints to access data about people"
+- name: "ship-order"
+  description: "Access to Ship orders information"
+- name: "auth"
+  description: "Authentication end-points"
+schemes:
+- "https"
+- "http"
+paths:
+  /api/people:
+    get:
+      tags:
+      - "people"
+      summary: "Get the list of people currently registered"
+      description: ""
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Person'
+        "401":
+          description: "Unauthenticated"
+  /api/ship-orders:
+    get:
+      tags:
+      - "ship-order"
+      summary: "Get the list of ship orders currently registered"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/ShipOrder'
+        "401":
+          description: "Unauthenticated"
+
+  /api/register:
+    post:
+      tags:
+      - "auth"
+      summary: "Register user into the system"
+      description: "Registers the user using provided name, email and password"
+      operationId: "registerUser"
+      consumes:
+      - "multipart/form-data"
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "formData"
+        description: "The name of the user"
+        required: true
+        type: "string"
+      - name: "email"
+        in: "formData"
+        description: "The email of the user"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "formData"
+        description: "The password of the user in clear text"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            type: "string"
+            description: "message indicating successful register"
+        "400":
+          description: "Invalid username/password supplied"
+  /api/login:
+    post:
+      tags:
+      - "auth"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      consumes:
+      - "multipart/form-data"
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "email"
+        in: "formData"
+        description: "The email used for login"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "formData"
+        description: "The password for login in clear text"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            type: "string"
+            description: "The token to be used for subsequent api calls"
+        "400":
+          description: "Invalid username/password supplied"
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+
+definitions:
+  ShipOrder:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      person:
+        $ref: "#/definitions/Person"
+      address:
+        $ref: "#/definitions/ShipOrderAddress"
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/ShipOrderItem"
+      created_at:
+        type: "string"
+        description: "date the ship order was created"
+      updated_at:
+        type: "string"
+        description: "date the ship order was updated"
+
+  ShipOrderItem:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      shipOrderId:
+        type: "integer"
+        format: "int64"
+      title:
+        type: "string"
+      quantity:
+        type: "integer"
+      price:
+        type: "number"
+
+  ShipOrderAddress:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      shipOrderId:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+      address:
+        type: "string"
+      city:
+        type: "string"
+      country:
+        type: "string"
+
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+      email:
+        type: "string"
+      password:
+        type: "string"
+
+  Person:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+      phones:
+        type: "array"
+        items:
+          $ref: "#/definitions/Phone"
+      created_at:
+        type: "string"
+        description: "date the person was created"
+      updated_at:
+        type: "string"
+        description: "date the person was updated"
+
+  Phone:
+    type: "object"
+    required:
+    - 'number'
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      number:
+        type: "string"
+
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
