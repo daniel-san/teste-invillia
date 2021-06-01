@@ -5,28 +5,27 @@ namespace App\Http\Controllers;
 use App\Http\Requests\XmlUploadRequest;
 use App\Jobs\ProcessXmlFilesJob;
 use App\Services\XmlService;
+use Exception;
 
 class XmlUploadController extends Controller
 {
-    public function store(XmlUploadRequest $request)
+    public function store(XmlUploadRequest $request, XmlService $xmlService)
     {
         $peopleFile = $request->file('people');
         $shipOrdersFile = $request->file('shiporders');
 
         if ($request->get('async')) {
             dispatch(new ProcessXmlFilesJob($peopleFile->get(), $shipOrdersFile->get()));
-            return back()->with('success', __('xml-upload.queued'));
+            return back()->with('success', __('messages.xml-upload.queued'));
         }
-
-        $xmlService = new XmlService;
 
         try {
             $people = $xmlService->parsePeopleXml($peopleFile->get());
             $orders = $xmlService->parseShipOrdersXml($shipOrdersFile->get());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return back()->withErrors($e->getMessage());
         }
 
-        return back()->with('success', __('xml-upload.success'));
+        return back()->with('success', __('messages.xml-upload.success'));
     }
 }

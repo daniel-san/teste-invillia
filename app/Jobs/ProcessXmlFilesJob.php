@@ -14,8 +14,13 @@ class ProcessXmlFilesJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /** @var string */
     protected $peopleXml;
+
+    /** @var string */
     protected $shipOrdersXml;
+
+    public $tries = 5;
 
     /**
      * Create a new job instance.
@@ -33,9 +38,9 @@ class ProcessXmlFilesJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(XmlService $service)
     {
-        $people = app(XmlService::class)->parsePeopleXml($this->peopleXml);
-        $orders = app(XmlService::class)->parseShipOrdersXml($this->shipOrdersXml);
+        $people = $service->parsePeopleXml($this->peopleXml);
+        $orders = $service->parseShipOrdersXml($this->shipOrdersXml);
     }
 }

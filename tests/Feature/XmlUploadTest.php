@@ -23,11 +23,12 @@ class XmlUploadTest extends TestCase
 
     public function test_it_can_process_xml_files_for_people_and_shiporders()
     {
-        $this->withoutExceptionHandling();
-        $people = UploadedFile::fake()->createWithContent('people.xml',
+        $people = UploadedFile::fake()->createWithContent(
+            'people.xml',
             file_get_contents(__DIR__ . '/../stubs/people.xml')
         );
-        $shipOrders = UploadedFile::fake()->createWithContent('shiporders.xml',
+        $shipOrders = UploadedFile::fake()->createWithContent(
+            'shiporders.xml',
             file_get_contents(__DIR__ . '/../stubs/shiporders.xml')
         );
 
@@ -45,10 +46,12 @@ class XmlUploadTest extends TestCase
     {
         Queue::fake();
 
-        $people = UploadedFile::fake()->createWithContent('people.xml',
+        $people = UploadedFile::fake()->createWithContent(
+            'people.xml',
             file_get_contents(__DIR__ . '/../stubs/people.xml')
         );
-        $shipOrders = UploadedFile::fake()->createWithContent('shiporders.xml',
+        $shipOrders = UploadedFile::fake()->createWithContent(
+            'shiporders.xml',
             file_get_contents(__DIR__ . '/../stubs/shiporders.xml')
         );
 
@@ -67,10 +70,12 @@ class XmlUploadTest extends TestCase
 
     public function test_it_returns_errors_when_files_are_invalid()
     {
-        $people = UploadedFile::fake()->createWithContent('people.xml',
+        $people = UploadedFile::fake()->createWithContent(
+            'people.xml',
             file_get_contents(__DIR__ . '/../stubs/people_invalid.xml')
         );
-        $shipOrders = UploadedFile::fake()->createWithContent('shiporders.xml',
+        $shipOrders = UploadedFile::fake()->createWithContent(
+            'shiporders.xml',
             file_get_contents(__DIR__ . '/../stubs/shiporders_invalid.xml')
         );
 
@@ -86,10 +91,12 @@ class XmlUploadTest extends TestCase
 
     public function test_it_returns_errors_when_files_are_malformed()
     {
-        $people = UploadedFile::fake()->createWithContent('people.xml',
+        $people = UploadedFile::fake()->createWithContent(
+            'people.xml',
             file_get_contents(__DIR__ . '/../stubs/people_malformed.xml')
         );
-        $shipOrders = UploadedFile::fake()->createWithContent('shiporders.xml',
+        $shipOrders = UploadedFile::fake()->createWithContent(
+            'shiporders.xml',
             file_get_contents(__DIR__ . '/../stubs/shiporders_malformed.xml')
         );
 

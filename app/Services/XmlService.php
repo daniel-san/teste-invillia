@@ -2,16 +2,40 @@
 
 namespace App\Services;
 
+use App\Contracts\XmlDtoGeneratorContract;
 use App\Models\Person;
 use App\Models\ShipOrder;
+use App\Repositories\PersonRepository;
+use App\Repositories\Repository;
+use App\Repositories\ShipOrderRepository;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class XmlService
 {
+    /**
+     * Person repository instance.
+     *
+     * @var Repository
+     */
+    protected $personRepository;
 
     /**
-     * Alias for the simplexml_load_string function
+     * ShipOrder repository instance.
+     *
+     * @var Repository
+     */
+    protected $shipOrderRepository;
+
+    public function __construct(PersonRepository $personRepository, ShipOrderRepository $shipOrderRepository)
+    {
+        $this->personRepository = $personRepository;
+        $this->shipOrderRepository = $shipOrderRepository;
+    }
+
+    /**
+     * Alias for the simplexml_load_string function.
      *
      * @throws RuntimeException
      * @return SimpleXMLElement
@@ -20,7 +44,7 @@ class XmlService
     {
         try {
             $parsedXml = simplexml_load_string($xml);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new RuntimeException("Xml file is invalid");
         }
 
@@ -28,96 +52,59 @@ class XmlService
     }
 
     /**
-     * Processes a xml file containing Person data into the database
+     * Process a xml string and save its contents to the database.
+     *
+     * @param string $xml
+     * @param Repository $repository
+     * @param XmlDtoGeneratorContract $dtoGenerator
+     * @return Collection|Model[]
+     */
+    public function processXml($xml, Repository $repository, XmlDtoGeneratorContract $dtoGenerator)
+    {
+        $parsedData = $this->parse($xml);
+
+        $entities = collect();
+
+        try {
+            DB::beginTransaction();
+            foreach ($parsedData as $entityData) {
+                $attributes = $dtoGenerator->getAttributesFromXml($entityData);
+
+                if ($entity = $repository->find($attributes['id'])) {
+                    $entities->push($repository->update($entity, $attributes));
+                    continue;
+                }
+
+                $entities->push($repository->create($attributes));
+            }
+
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+
+        return $entities;
+    }
+
+    /**
+     * Processes a xml containing Person data and saves them into the database.
      *
      * @return Collection|Person[]
      */
     public function parsePeopleXml($xml)
     {
-        $parsed = $this->parse($xml);
-
-        $people = collect();
-
-        try {
-            DB::beginTransaction();
-            foreach($parsed as $personData) {
-
-                if ($person = Person::whereId($personData->personid)->first()) {
-                    $people->push($person);
-                    continue;
-                }
-
-                $person = new Person();
-                $person->id = $personData->personid;
-                $person->name = $personData->personname;
-
-                $people->push(
-                    tap($person)->save()
-                );
-
-                foreach ($personData->phones->phone as $phone) {
-                    $person->phones()->create([
-                        'number' => $phone
-                    ]);
-                }
-            }
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-
-        return $people;
+        return $this->processXml($xml, $this->personRepository, new Person());
     }
 
+
+    /**
+     * Processes a file containing ShipOrder data and saves them into the database.
+     *
+     * @return Collection|ShipOrder[]
+     */
     public function parseShipOrdersXml($xml)
     {
-        $parsed = $this->parse($xml);
-
-        $shipOrders = collect();
-
-        try {
-            DB::beginTransaction();
-            foreach($parsed as $shipOrderData) {
-
-                if ($shipOrder = ShipOrder::whereId($shipOrderData->orderid)->first()) {
-                    $shipOrders->push($shipOrders);
-                    continue;
-                }
-
-                $shipOrder = new ShipOrder();
-                $shipOrder->id = $shipOrderData->orderid;
-                $shipOrder->person_id = $shipOrderData->orderperson;
-
-                $shipOrders->push(
-                    tap($shipOrder)->save()
-                );
-
-                $shipOrder->address()->create([
-                    'name' => $shipOrderData->shipto->name,
-                    'address' => $shipOrderData->shipto->address,
-                    'city' => $shipOrderData->shipto->city,
-                    'country' => $shipOrderData->shipto->country,
-                ]);
-
-                foreach ($shipOrderData->items->item as $item)
-                {
-                    $shipOrder->items()->create([
-                        'title' => $item->title,
-                        'note' => $item->note,
-                        'quantity' => intval($item->quantity),
-                        'price' => floatval($item->price),
-                    ]);
-                }
-            }
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-
-        return $shipOrders;
+        return $this->processXml($xml, $this->shipOrderRepository, new ShipOrder());
     }
 }

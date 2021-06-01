@@ -2,8 +2,10 @@
 
 namespace App\Rules;
 
+use Exception;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class PeopleXml implements Rule
 {
@@ -20,27 +22,25 @@ class PeopleXml implements Rule
 
         try {
             $this->validateXml($peopleXml);
-        } catch (\Exception $e) {
+        } catch (ValidationException $e) {
+            return false;
+        } catch (Exception $e) {
             return false;
         }
 
         return true;
     }
 
+    /**
+     * Verify if the passed xml is valid.
+     *
+     * @param string $xml
+     * @throws ValidationException
+     * @return array
+     */
     protected function validateXml($xml)
     {
-        $parsed = json_encode(simplexml_load_string($xml));
-        $xmlArray = json_decode($parsed, true);
-
-        $xmlArray = collect($xmlArray)->first();
-
-        foreach($xmlArray as $key => $value) {
-            $phones = data_get($value, 'phones');
-
-            if (!is_array($phones['phone'])) {
-                data_set($xmlArray, "{$key}.phones.phone", [$phones['phone']]);
-            }
-        }
+        $peopleArray = $this->prepareDataForValidation($xml);
 
         $rules = [
             '*.personid' => 'numeric',
@@ -48,9 +48,33 @@ class PeopleXml implements Rule
             '*.phones.phone.*' => 'numeric',
         ];
 
-        $validator = Validator::make($xmlArray, $rules);
+        $validator = Validator::make($peopleArray, $rules);
 
         return $validator->validate();
+    }
+
+    /**
+     * Prepare the data from the xml for validation.
+     *
+     * @param string $xml
+     * @return array
+     */
+    protected function prepareDataForValidation($xml)
+    {
+        $parsedPeople = json_encode(simplexml_load_string($xml));
+        $peopleArray = json_decode($parsedPeople, true);
+
+        $peopleArray = collect($peopleArray)->first();
+
+        foreach ($peopleArray as $key => $person) {
+            $phones = data_get($person, 'phones');
+
+            if (!is_array($phones['phone'])) {
+                data_set($peopleArray, "{$key}.phones.phone", [$phones['phone']]);
+            }
+        }
+
+        return $peopleArray;
     }
 
     /**
