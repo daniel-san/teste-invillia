@@ -52,7 +52,10 @@ is the same as running this:
 docker-compose up -d
 ```
 
-For convenience, throughout this document ```sail``` will be used when running commands like ```artisan migrate```, but the ```docker-compose``` counterparts can be run without any issues.
+For convenience, throughout this document ```sail``` will be used when running commands like ```artisan migrate```, but the ```docker-compose``` counterparts can be run without any issues:
+```
+docker-compose exec -u sail laravel.test php artisan migrate
+```
 It's recomended to alias the sail script to easily run commands:
 ```
 alias sail='bash vendor/bin/sail'
@@ -63,7 +66,7 @@ The application can be started using ```sail``` by running the command:
 ```
 sail up laravel.test mysql redis
 or
-sail up -d laravel.test mysql redis
+sail up -d laravel.test mysql redis #start in the background
 ```
 The first execution of this command will take some time while docker builds the containers for the web application, mysql and redis. If the build fails, try running the command again in case it failed due to a network issue during the build process.
 
@@ -90,7 +93,7 @@ sudo ./vendor/bin/sail build laravel.test mysql redis
 ```
 Now the application should run without any issues.
 
-If you aliased the sail script, it will not work when running with ```sudo``` due to user specific aliases not being available to ```root```. In this case, run the script by using its full path:
+If you aliased the sail script, it will not work when running with ```sudo``` due to user specific aliases not being available to the ```root``` user. In this case, run the script by using its full path:
 ```
 sudo ./vendor/bin/sail ...
 ```
@@ -139,7 +142,7 @@ Users can also register and login through the API using the following routes:
 # API documentation
 The project includes an API documentation using the OpenAPI spec. The files containing the documentation are ```apidoc.yaml``` and ```apidoc.json```.
 
-The following command creates a docker container that can be used to view the documentation in the browser:
+The following command creates a temporary docker container that can be used to view the documentation in the browser:
 ```
 docker run --rm  -p 8080:8080 -e SWAGGER_JSON=/doc/apidoc.json -v $PWD:/doc swaggerapi/swagger-ui
 ```
